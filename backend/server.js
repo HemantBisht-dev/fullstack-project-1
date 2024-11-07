@@ -9,7 +9,19 @@ const app = express();
 // middleware - it runs before the send the response back to client
 app.use(express.json()); // allows us to accept json data in the req.body
 
-app.post("/api/product", async (req, res) => {
+
+app.get("/api/products", async(req,res)=>{
+  try {
+    const products = await Product.find({});
+    res.status(200).json({success:true, data:products})
+  } catch (error) {
+    console.error("error in created product: ", error.message);
+    // 500 - internal server error
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+})
+
+app.post("/api/products", async (req, res) => {
   const product = req.body; // user will send this data
 
   // if user didn't provide fields
@@ -33,7 +45,7 @@ app.post("/api/product", async (req, res) => {
   }
 });
 
-app.delete("/api/product/:id", async(req, res) => {
+app.delete("/api/products/:id", async(req, res) => {
   const { id } = req.params;
 
   try {
@@ -45,6 +57,7 @@ app.delete("/api/product/:id", async(req, res) => {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
+
 
 const PORT = process.env.PORT || 3000;
 
