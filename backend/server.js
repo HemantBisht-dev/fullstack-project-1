@@ -9,7 +9,7 @@ const app = express();
 // middleware - it runs before the send the response back to client
 app.use(express.json()); // allows us to accept json data in the req.body
 
-app.post("/api/product", async(req,res) => {
+app.post("/api/product", async (req, res) => {
   const product = req.body; // user will send this data
 
   // if user didn't provide fields
@@ -26,6 +26,19 @@ app.post("/api/product", async(req,res) => {
     await newProduct.save();
     // 201 - request succeeded and new resource was created (POST, PUT)
     res.status(201).json({ success: true, data: newProduct });
+  } catch (error) {
+    console.error("error in created product: ", error.message);
+    // 500 - internal server error
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+});
+
+app.delete("/api/product/:id", async(req, res) => {
+  const { id } = req.params;
+
+  try {
+    await Product.findByIdAndDelete(id);
+    res.status(200).json({ success: true, message: "product deleted" });
   } catch (error) {
     console.error("error in created product: ", error.message);
     // 500 - internal server error
