@@ -1,18 +1,53 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useProductStore } from "../store/product";
+import { useNavigate, useParams } from "react-router-dom";
 
 function CreatePage() {
-  const [product, setProduct] = useState({ name: "", price: "", image: "" });
+  const { createProduct, updateProduct, getProduct, products } = useProductStore();
+  const [product, setProduct] = useState({
+    name: "",
+    price: "",
+    image: "",
+  });
+  const { id } = useParams();
+  const navigate = useNavigate();
 
   function changeValue(e) {
     const { name, value } = e.target;
     setProduct({ ...product, [name]: value });
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    console.log(product);
+
+    if (id) {
+      const { success, message } = await updateProduct(id,product);
+      console.log("updateSuccess: ", success);
+      console.log("updateMessage: ", message);
+    } else {
+      const { success, message } = await createProduct(product);
+      console.log("createSuccess: ", success);
+      console.log("message: ", message);
+    }
     setProduct({ name: "", price: "", image: "" });
+    navigate('/')
   }
+
+  useEffect(() => {
+    if (id) {
+      getProduct(id);
+    }
+  }, [getProduct, id]);
+
+  useEffect(()=>{
+    if(products){
+      setProduct({
+        name: products.name || "",
+        price: products.price || "",
+        image: products.image || "",
+      })
+    }
+  },[products])
   return (
     <div className=" w-6/12 m-auto px-6 py-24 sm:py-20 lg:px-8">
       <div className="mx-auto max-w-2xl text-center">
@@ -86,7 +121,7 @@ function CreatePage() {
             type="submit"
             className="block w-full rounded-md bg-indigo-600 px-3.5 py-2.5 text-center text-lg font-semibold text-white shadow-sm hover:bg-indigo-500"
           >
-            Create
+            {id ? "Update" : "Create"}
           </button>
         </div>
       </form>
